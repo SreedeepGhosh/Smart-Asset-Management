@@ -86,8 +86,8 @@ cd Smart-Asset-Management</code></pre>
     <th>📋 Fault Tickets</th>
   </tr>
   <tr>
-    <td><img src="screenshots/live_charts.jpg" alt="Live Charts" width="100%"></td>
-    <td><img src="screenshots/fault_tickets.jpg" alt="Fault Tickets" width="100%"></td>
+    <td><img src="live_charts.jpg" alt="Live Charts" width="100%"></td>
+    <td><img src="fault_tickets.jpg" alt="Fault Tickets" width="100%"></td>
   </tr>
 </table>
 
@@ -96,7 +96,7 @@ cd Smart-Asset-Management</code></pre>
     <th>🧠 SHAP Explainability</th>
   </tr>
   <tr>
-    <td><img src="screenshots/shap_explanation.jpg" alt="SHAP Explanation" width="100%"></td>
+    <td><img src="shap_explanation.jpg" alt="SHAP Explanation" width="100%"></td>
   </tr>
 </table>
 
