@@ -1,0 +1,4 @@
+asset_id,install_date,last_maintenance,location,asset_age_months
+HVAC,2022-01-01,2024-05-10,Rooftop,30
+Chiller,2021-06-15,2024-06-01,Basement,48
+Solar,2023-03-10,2024-03-01,Terrace,15
