@@ -5,19 +5,24 @@ import plotly.graph_objects as go
 import joblib
 from datetime import datetime
 from streamlit_autorefresh import st_autorefresh
-from xgboost import XGBClassifier
 import os
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import shap
 import warnings
-from zoneinfo import ZoneInfo
 warnings.filterwarnings("ignore")
 
 
 st.set_page_config(page_title="🚨 Xempla Fault Detection", layout="wide")
 st.title("🏢 Smart Asset Intelligence Dashboard")
 
+st.info(
+    "📌 **Dashboard Overview**\n\n"
+    "This smart asset monitoring dashboard simulates real-time sensor data from key building systems: HVAC (Temperature), Chiller (Power), and Solar (Efficiency). "
+    "The charts display live sensor trends over time, with automatic detection of anomalies based on machine learning (XGBoost). Faults are visually marked with severity levels (Warning / Critical), and corresponding fault tickets are generated below.\n\n"
+    "**Note:** All data currently shown is *synthetically generated* with random anomaly injections every 2 minutes for testing purposes only. "
+    "Once connected to actual IoT sensors, this dashboard will operate in real-time using live building data for actionable fault detection."
+)
 
 st_autorefresh(interval=30000, key="auto-refresh")  # 30 seconds
 
@@ -27,45 +32,6 @@ meta_path = "asset_metadata.csv"
 log_path = "fault_tickets.csv"
 
 
-# --- SIMULATED LIVE DATA LOGIC ---
-if "data_cycle" not in st.session_state:
-    st.session_state.data_cycle = 0
-
-def simulate_live_data():
-    ts = datetime.now(ZoneInfo("Asia/Kolkata"))
-    new_data = []
-    inject_anomaly = (st.session_state.data_cycle % 4 == 0)  # Every 4th cycle (2 minutes)
-
-    # HVAC Temperature
-    hvac_temp = 22 + 3 * np.sin(2 * np.pi * (ts.hour / 24)) + np.random.normal(0, 0.5)
-    if inject_anomaly and np.random.rand() < 0.5:
-        hvac_temp += np.random.uniform(6, 9)
-    new_data.append([ts, "HVAC", "Temperature", round(hvac_temp, 2), "°C"])
-
-    # Chiller Power
-    chiller_power = 150 + 10 * np.cos(2 * np.pi * (ts.hour / 24)) + np.random.normal(0, 2)
-    if inject_anomaly and np.random.rand() < 0.5:
-        chiller_power += np.random.uniform(20, 30)
-    new_data.append([ts, "Chiller", "Power", round(chiller_power, 2), "kW"])
-
-    # Solar Efficiency
-    is_day = 6 <= ts.hour <= 18
-    base_eff = 90 if is_day else 0
-    solar_eff = base_eff + np.random.normal(0, 2)
-    if inject_anomaly and is_day and np.random.rand() < 0.5:
-        solar_eff -= np.random.uniform(25, 35)
-    solar_eff = max(0, solar_eff)
-    new_data.append([ts, "Solar", "Efficiency", round(solar_eff, 2), "%"])
-
-    # Append to CSV
-    df_new = pd.DataFrame(new_data, columns=["timestamp", "asset_id", "metric", "value", "unit"])
-    df_new.to_csv(data_path, mode='a', header=not os.path.exists(data_path), index=False)
-
-    st.session_state.data_cycle += 1
-    # st.success(f"🟢 Simulated data at {ts.strftime('%H:%M:%S')} | Anomaly: {inject_anomaly}") --> HEADER FOR ANOMALY INSERTION
-
-# Run the simulation on each refresh
-simulate_live_data()
 
 df = pd.read_csv(data_path, parse_dates=["timestamp"])
 meta = pd.read_csv(meta_path)
@@ -156,13 +122,7 @@ for asset in selected_assets:
         st.plotly_chart(fig, use_container_width=True)
 
 
-st.info(
-    "📌 **Dashboard Overview**\n\n"
-    "This smart asset monitoring dashboard simulates real-time sensor data from key building systems: HVAC (Temperature), Chiller (Power), and Solar (Efficiency). "
-    "The charts display live sensor trends over time, with automatic detection of anomalies based on machine learning (XGBoost). Faults are visually marked with severity levels (Warning / Critical), and corresponding fault tickets are generated below.\n\n"
-    "**Note:** All data currently shown is *synthetically generated* with random anomaly injections every 2 minutes for testing purposes only. "
-    "Once connected to actual IoT sensors, this dashboard will operate in real-time using live building data for actionable fault detection."
-)
+
 
 # 📋 Fault Tickets
 st.subheader("📋 Fault Tickets (Generated in real-time)")
@@ -212,8 +172,6 @@ for idx, (_, row) in enumerate(latest_faults.iterrows()):
         }
         pd.concat([log_df, pd.DataFrame([new_ticket])], ignore_index=True).to_csv(log_path, index=False)
 
-# 📊 SHAP Explanations
-
 st.subheader("🔍 SHAP Explainability (Last Fault per Asset)")
 
 # Define input features
@@ -251,3 +209,46 @@ for i, (_, row) in enumerate(last_faults.iterrows()):
     shap.plots.bar(shap_for_class, show=False)
     plt.title(title, fontsize=10, color="black", pad=20)
     st.pyplot(fig)
+
+
+
+
+# --- SIMULATED LIVE DATA LOGIC ---
+if "data_cycle" not in st.session_state:
+    st.session_state.data_cycle = 0
+
+def simulate_live_data():
+    ts = datetime.now()
+    new_data = []
+    inject_anomaly = (st.session_state.data_cycle % 4 == 0)  # Every 4th cycle (2 minutes)
+
+    # HVAC Temperature
+    hvac_temp = 22 + 3 * np.sin(2 * np.pi * (ts.hour / 24)) + np.random.normal(0, 0.5)
+    if inject_anomaly and np.random.rand() < 0.5:
+        hvac_temp += np.random.uniform(6, 9)
+    new_data.append([ts, "HVAC", "Temperature", round(hvac_temp, 2), "°C"])
+
+    # Chiller Power
+    chiller_power = 150 + 10 * np.cos(2 * np.pi * (ts.hour / 24)) + np.random.normal(0, 2)
+    if inject_anomaly and np.random.rand() < 0.5:
+        chiller_power += np.random.uniform(20, 30)
+    new_data.append([ts, "Chiller", "Power", round(chiller_power, 2), "kW"])
+
+    # Solar Efficiency
+    is_day = 6 <= ts.hour <= 18
+    base_eff = 90 if is_day else 0
+    solar_eff = base_eff + np.random.normal(0, 2)
+    if inject_anomaly and is_day and np.random.rand() < 0.5:
+        solar_eff -= np.random.uniform(25, 35)
+    solar_eff = max(0, solar_eff)
+    new_data.append([ts, "Solar", "Efficiency", round(solar_eff, 2), "%"])
+
+    # Append to CSV
+    df_new = pd.DataFrame(new_data, columns=["timestamp", "asset_id", "metric", "value", "unit"])
+    df_new.to_csv(data_path, mode='a', header=not os.path.exists(data_path), index=False)
+
+    st.session_state.data_cycle += 1
+    # st.success(f" Simulated data at {ts.strftime('%H:%M:%S')} | Anomaly: {inject_anomaly}") --> HEADER FOR ANOMALY INSERTION
+
+# Run the simulation on each refresh
+simulate_live_data()
