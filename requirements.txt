@@ -1,0 +1,10 @@
+streamlit>=1.20
+streamlit-autorefresh>=0.0.3
+pandas>=1.5
+numpy>=1.21
+scikit-learn>=1.2
+xgboost>=1.7
+plotly>=5.5
+matplotlib>=3.5
+shap>=0.41
+joblib>=1.2
