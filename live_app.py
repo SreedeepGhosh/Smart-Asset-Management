@@ -25,6 +25,14 @@ st.info(
 )
 
 
+st_autorefresh(interval=30000, key="auto-refresh")
+
+data_path = "multi_asset_data.csv"
+meta_path = "asset_metadata.csv"
+log_path = "fault_tickets.csv"
+
+tz = pytz.timezone("Asia/Kolkata")
+
 if "data_cycle" not in st.session_state:
     st.session_state.data_cycle = 0
 
@@ -58,14 +66,6 @@ def simulate_live_data():
     st.session_state.data_cycle += 1
 
 simulate_live_data()
-
-st_autorefresh(interval=30000, key="auto-refresh")
-
-data_path = "multi_asset_data.csv"
-meta_path = "asset_metadata.csv"
-log_path = "fault_tickets.csv"
-
-tz = pytz.timezone("Asia/Kolkata")
 
 df = pd.read_csv(data_path)
 df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
