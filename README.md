@@ -1,4 +1,4 @@
-<h1>🏭 Xempla Fault Detection Dashboard</h1>
+<h1>🏭 Smart Asset Fault Detection Dashboard</h1>
 <h3>AI-Powered Live Fault Detection for Smart Asset Monitoring</h3>
 
 <p>
