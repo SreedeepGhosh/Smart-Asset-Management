@@ -13,7 +13,7 @@ import pytz
 
 warnings.filterwarnings("ignore")
 
-st.set_page_config(page_title="🚨 Xempla Fault Detection", layout="wide")
+st.set_page_config(page_title="🚨 Smart Asset Fault Detection", layout="wide")
 st.title("🏢 Smart Asset Intelligence Dashboard")
 
 st.info(
