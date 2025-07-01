@@ -21,7 +21,7 @@
 <hr>
 
 <h2>🚀 Live Demo</h2>
-<p>👉 <a href="https://your-streamlit-app-url" target="_blank">Launch the App</a></p>
+<p>👉 <a href="https://smart-asset-management.streamlit.app/" target="_blank">Launch the App</a></p>
 
 <hr>
 
