@@ -24,6 +24,41 @@ st.info(
     "Once connected to actual IoT sensors, this dashboard will operate in real-time using live building data for actionable fault detection."
 )
 
+
+if "data_cycle" not in st.session_state:
+    st.session_state.data_cycle = 0
+
+def simulate_live_data():
+    ts = datetime.now(tz)
+    new_data = []
+    inject_anomaly = (st.session_state.data_cycle % 4 == 0)
+
+    hvac_temp = 22 + 3 * np.sin(2 * np.pi * (ts.hour / 24)) + np.random.normal(0, 0.5)
+    if inject_anomaly and np.random.rand() < 0.5:
+        hvac_temp += np.random.uniform(6, 9)
+    new_data.append([ts, "HVAC", "Temperature", round(hvac_temp, 2), "°C"])
+
+    chiller_power = 150 + 10 * np.cos(2 * np.pi * (ts.hour / 24)) + np.random.normal(0, 2)
+    if inject_anomaly and np.random.rand() < 0.5:
+        chiller_power += np.random.uniform(20, 30)
+    new_data.append([ts, "Chiller", "Power", round(chiller_power, 2), "kW"])
+
+    is_day = 6 <= ts.hour <= 18
+    base_eff = 90 if is_day else 0
+    solar_eff = base_eff + np.random.normal(0, 2)
+    if inject_anomaly and is_day and np.random.rand() < 0.5:
+        solar_eff -= np.random.uniform(25, 35)
+    solar_eff = max(0, solar_eff)
+    new_data.append([ts, "Solar", "Efficiency", round(solar_eff, 2), "%"])
+
+    df_new = pd.DataFrame(new_data, columns=["timestamp", "asset_id", "metric", "value", "unit"])
+    df_new["timestamp"] = df_new["timestamp"].dt.tz_localize(None)
+    df_new.to_csv(data_path, mode='a', header=not os.path.exists(data_path), index=False)
+
+    st.session_state.data_cycle += 1
+
+simulate_live_data()
+
 st_autorefresh(interval=30000, key="auto-refresh")
 
 data_path = "multi_asset_data.csv"
@@ -177,37 +212,3 @@ for _, row in last_faults.iterrows():
     shap.plots.bar(shap_for_class, show=False)
     plt.title(title, fontsize=10, color="black", pad=20)
     st.pyplot(fig)
-
-if "data_cycle" not in st.session_state:
-    st.session_state.data_cycle = 0
-
-def simulate_live_data():
-    ts = datetime.now(tz)
-    new_data = []
-    inject_anomaly = (st.session_state.data_cycle % 4 == 0)
-
-    hvac_temp = 22 + 3 * np.sin(2 * np.pi * (ts.hour / 24)) + np.random.normal(0, 0.5)
-    if inject_anomaly and np.random.rand() < 0.5:
-        hvac_temp += np.random.uniform(6, 9)
-    new_data.append([ts, "HVAC", "Temperature", round(hvac_temp, 2), "°C"])
-
-    chiller_power = 150 + 10 * np.cos(2 * np.pi * (ts.hour / 24)) + np.random.normal(0, 2)
-    if inject_anomaly and np.random.rand() < 0.5:
-        chiller_power += np.random.uniform(20, 30)
-    new_data.append([ts, "Chiller", "Power", round(chiller_power, 2), "kW"])
-
-    is_day = 6 <= ts.hour <= 18
-    base_eff = 90 if is_day else 0
-    solar_eff = base_eff + np.random.normal(0, 2)
-    if inject_anomaly and is_day and np.random.rand() < 0.5:
-        solar_eff -= np.random.uniform(25, 35)
-    solar_eff = max(0, solar_eff)
-    new_data.append([ts, "Solar", "Efficiency", round(solar_eff, 2), "%"])
-
-    df_new = pd.DataFrame(new_data, columns=["timestamp", "asset_id", "metric", "value", "unit"])
-    df_new["timestamp"] = df_new["timestamp"].dt.tz_localize(None)
-    df_new.to_csv(data_path, mode='a', header=not os.path.exists(data_path), index=False)
-
-    st.session_state.data_cycle += 1
-
-simulate_live_data()
